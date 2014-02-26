@@ -31,8 +31,8 @@ unsigned long vNOS = 0;
 
 unsigned long mDelay;
 unsigned long vDelay;
-unsigned long NOS = 1000;    //
-unsigned long Delay = 500;  //
+unsigned long NOS = 1000;    // default wert  
+unsigned long Delay = 500;  // default wert
 
 void setup() {
   // initialize the LED pin as an output:

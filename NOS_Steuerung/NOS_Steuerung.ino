@@ -185,7 +185,7 @@ lastNOS = mDelay ;
  
  }
      while (nosactive == 1);   
-  delay (5000); //Blocken nach run     
+  delay (500); //Blocken nach run     
   lcd.clear();
         
       

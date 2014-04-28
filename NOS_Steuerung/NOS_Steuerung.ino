@@ -140,6 +140,7 @@ if (keyPress < 600 && keyPress > 400 ) {nosactive = 1;}
    if (buttonState == HIGH && x==0 ) {  
      delay (1000);
      x = 1;
+     nosactive = 0;
      }
 if (buttonState == LOW && x==1 ) { 
   nosactive = 1;
@@ -179,10 +180,16 @@ lastNOS = mDelay ;
     digitalWrite(ledPin2, LOW);  // nos dauer
     nosactive = 0;
      n = 0 ;
+     
       }
+ buttonState = digitalRead(buttonPin); // abfrage während des laufes
    
-
- 
+if (buttonState == HIGH && x==0 ) { // abbruch kriterium und neustart
+  digitalWrite(ledPin2, LOW);
+  nosactive = 0;
+  n=0;
+  x=1;
+ }
  }
      while (nosactive == 1);   
   delay (500); //Blocken nach run     

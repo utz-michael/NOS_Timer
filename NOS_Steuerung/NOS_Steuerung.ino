@@ -33,7 +33,7 @@ unsigned long mDelay;
 unsigned long vDelay;
 unsigned long NOS = 1000;    // default wert  
 unsigned long Delay = 500;  // default wert
-
+int x = 0;
 void setup() {
   // initialize the LED pin as an output:
 
@@ -83,7 +83,7 @@ void setup() {
  lcd.setCursor(0, 0);
 delay(1000); 
 //Interrupt starten
-attachInterrupt(0, interruptroutine, FALLING ); 
+ 
 nosactive = 0;
 
 }
@@ -133,6 +133,19 @@ void loop(){
     keyPress = analogRead(0); 
 if (keyPress < 600 && keyPress > 400 ) {nosactive = 1;}
   
+ buttonState = digitalRead(buttonPin); // abfrage beim einschalten 
+
+// default werte herstellen beim einschalten
+
+   if (buttonState == HIGH && x==0 ) {  
+     delay (1000);
+     x = 1;
+     }
+if (buttonState == LOW && x==1 ) { 
+  nosactive = 1;
+  x=0;
+  }
+  
 
  //nos starten ------------------------------------------------------------------------------------------------------------------------------------------------
  if (nosactive == 1) {
@@ -142,7 +155,7 @@ if (keyPress < 600 && keyPress > 400 ) {nosactive = 1;}
    do {
  
     
-    detachInterrupt(0) ; // interuupt abschalten wÃ¤hrend nos lÃ¤uft
+    
       lcd.setCursor(0, 0);
         lcd.print("   Go Baby Go   ");
       lcd.setCursor(0, 1);
@@ -177,7 +190,7 @@ lastNOS = mDelay ;
         
       
       
-attachInterrupt(0, interruptroutine, FALLING ); // interupt einschalten
+
 
  }
    else {nosactive = 0;}
@@ -189,7 +202,7 @@ nosactive = 0;
 
  if(keyPress < 873 && keyPress > 603){
      
-  detachInterrupt(0) ; // interuupt abschalten fÃ¼r setup
+  
    
   do {
      keyPress = analogRead(0); 
@@ -292,7 +305,7 @@ nosactive = 0;
   lcd.clear();
    writemem ();   // daten speichern
  
-     attachInterrupt(0, interruptroutine, FALLING ); // interupt einschalten 
+     
     } 
 
   
@@ -329,11 +342,6 @@ void readmem () {
 return;
 }
 
-void interruptroutine(){     // Transbrake loslassen auswerten
- digitalWrite(ledPin1, LOW);
-nosactive = 1 ; 
- return;
-  
- } 
+
  
 

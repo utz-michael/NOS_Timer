@@ -34,6 +34,7 @@ unsigned long vDelay;
 unsigned long NOS = 1000;    // default wert  
 unsigned long Delay = 500;  // default wert
 int x = 0;
+
 void setup() {
   // initialize the LED pin as an output:
 
@@ -82,9 +83,9 @@ void setup() {
    readmem (); // eeprom lesen
  lcd.setCursor(0, 0);
 delay(1000); 
-//Interrupt starten
+
  
-nosactive = 0;
+nosactive = 0; // nos sicher deaktivieren
 
 }
 void loop(){
@@ -133,18 +134,20 @@ void loop(){
     keyPress = analogRead(0); 
 if (keyPress < 600 && keyPress > 400 ) {nosactive = 1;}
   
- buttonState = digitalRead(buttonPin); // abfrage beim einschalten 
+ buttonState = digitalRead(buttonPin); // abfrage ob transbrake gedrückt
 
-// default werte herstellen beim einschalten
 
+// Abfrage der steigenden flanke des Transbrake Buttons
    if (buttonState == HIGH && x==0 ) {  
      delay (1000);
-     x = 1;
-     nosactive = 0;
+     x = 1; // steigende Flanke dedektiert
+     nosactive = 0; // nos timer sicher ausgeschaltet
      }
+     
+// Abfrage der fallenden Flanke des Transbrake Buttons     
 if (buttonState == LOW && x==1 ) { 
-  nosactive = 1;
-  x=0;
+  nosactive = 1; // nos timer einschalten
+  x=0; //Flanken dedektierung zurücksetzen
   }
   
 

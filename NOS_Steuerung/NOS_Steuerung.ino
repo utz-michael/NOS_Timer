@@ -19,15 +19,18 @@ int buttonState = LOW;         // variable for reading the pushbutton status
 
 
 int ledState = LOW;             // ledState used to set the LED
-int n = 0;                    // indikator ob Delay_Fogger durchgelaufen
+int n = 0; 
+int m = 0;// indikator ob Delay_Fogger durchgelaufen
 long previousMillis = 0;        // will store last time LED was updated
 long interval = 200;           // LCD blink geschwindigkeit
 
 volatile int nosactive = 0; // nos status fÃ¼r interupt
-
+volatile int nosactivePlate = 0; // nos status fÃ¼r interupt
 unsigned long lastDelay = 0;
 unsigned long lastNOS = 0;
+unsigned long lastNOSplate = 0;
 unsigned long vNOS = 0;
+unsigned long vNOSplate = 0;
 
 unsigned long mDelay;
 unsigned long vDelay;
@@ -142,7 +145,7 @@ if (buttonState == LOW && x==1 ) {
   
 
  //nos starten ------------------------------------------------------------------------------------------------------------------------------------------------
- if (nosactive == 1) {
+ if (nosactive == 1 || nosactivePlate == 1) {
    mDelay = micros(); // zeit speichern am anfang der warteschleife
    lastDelay = mDelay;
    lcd.clear();
@@ -167,6 +170,20 @@ if (buttonState == LOW && x==1 ) {
 lastNOS = mDelay ;
  n = 1;
   }
+  
+   if (vDelay > Delay_Plate * 1000 && m == 0) { 
+    digitalWrite(NOSPlatePIN, HIGH);
+ 
+ 
+lastNOSplate = mDelay ;
+ m = 1;
+  }
+  
+  
+  
+  
+  
+   vNOSplate = mDelay - lastNOSplate;
    vNOS = mDelay - lastNOS;
    
   if (vNOS > NOS_Fogger * 1000 && n == 1){ 
@@ -175,16 +192,29 @@ lastNOS = mDelay ;
      n = 0 ;
      
       }
+    if (vNOSplate > NOS_Plate * 1000 && m == 1){ 
+    digitalWrite(NOSPlatePIN, LOW);  // nos dauer
+    nosactivePlate = 0;
+     m = 0 ;
+     
+      }   
+      
+      
+      
+      
  buttonState = digitalRead(TransbrakePIN); // abfrage während des laufes
    
 if (buttonState == HIGH && x==0 ) { // abbruch kriterium und neustart
   digitalWrite(NOSFoggerPIN, LOW);
+  digitalWrite(NOSPlatePIN, LOW);
   nosactive = 0;
+  nosactivePlate = 0;
+  m = 0 ;
   n=0;
   x=1;
  }
  }
-     while (nosactive == 1);   
+     while (nosactive == 1 || nosactivePlate == 1);   
   delay (2000); //Blocken nach run     
   lcd.clear();
   anzeige (); // Aufruf anzeige      

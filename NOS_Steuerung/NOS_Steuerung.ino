@@ -93,7 +93,7 @@ nosactive = 0; // nos sicher deaktivieren
 anzeige (); // Aufruf anzeige
 }
 void loop(){
-   
+  /* 
    unsigned long currentMillis = millis();
   
    if(currentMillis - previousMillis > interval) {
@@ -102,7 +102,7 @@ void loop(){
         lcd.scrollDisplayLeft();
     
    }
-    
+ */   
  
    
    
@@ -447,7 +447,7 @@ return;
 
 void anzeige () {
   lcd.setCursor(0, 0);
- 
+ /*
      lcd.print("Fogger delay/duration: ");
     lcd.print(Delay_Fogger);
     lcd.print(" / ");
@@ -461,7 +461,20 @@ void anzeige () {
     keyPress = analogRead(0); 
     lcd.print(NOS_Plate);    
     lcd.print("ms ");
-    
+   */ 
+       lcd.print("Fogger:");
+    lcd.print(Delay_Fogger);
+    lcd.print("/");
+    keyPress = analogRead(0); 
+    lcd.print(NOS_Fogger);    
+    lcd.print("ms");
+    lcd.setCursor(0, 1);
+    lcd.print("Plate: ");
+    lcd.print(Delay_Plate);
+    lcd.print("/");
+    keyPress = analogRead(0); 
+    lcd.print(NOS_Plate);    
+    lcd.print("ms");
     return;
     }
  

@@ -467,14 +467,14 @@ void anzeige () {
     lcd.print("/");
     keyPress = analogRead(0); 
     lcd.print(NOS_Fogger);    
-    lcd.print("ms");
+    //lcd.print("ms");
     lcd.setCursor(0, 1);
     lcd.print("Plate: ");
     lcd.print(Delay_Plate);
     lcd.print("/");
     keyPress = analogRead(0); 
     lcd.print(NOS_Plate);    
-    lcd.print("ms");
+    //lcd.print("ms");
     return;
     }
  

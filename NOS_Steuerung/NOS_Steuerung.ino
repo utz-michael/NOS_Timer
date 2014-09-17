@@ -6,9 +6,9 @@ LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 
 // constants won't change. They're used here to 
 // set pin numbers:
-const int buttonPin = 2;     // the number of the pushbutton pin Transbrake Button
-const int ledPin1 =  13;      // the number of the LED pin Tranbrake
-const int ledPin2 =  12;      // the number of the LED pin NOS
+const int TransbrakePIN = 2;     // the number of the pushbutton pin Transbrake Button
+//const int ledPin1 =  13;      // the number of the LED pin Tranbrake
+const int NOSFoggerPIN =  12;      // the number of the LED pin NOS
 
 
 
@@ -38,15 +38,15 @@ int x = 0;
 void setup() {
   // initialize the LED pin as an output:
 
-  pinMode(ledPin1, OUTPUT);     // Transbarke Indikator nicht genutzt
-  pinMode(ledPin2, OUTPUT);    // Nos Aktiv
+//  pinMode(ledPin1, OUTPUT);     // Transbarke Indikator nicht genutzt
+  pinMode(NOSFoggerPIN, OUTPUT);    // Nos Aktiv
 
   
   // initialize the pushbutton pin as an input:
-  pinMode(buttonPin, INPUT);     //transbrake
+  pinMode(TransbrakePIN, INPUT);     //transbrake
   
  //NOS ausgang ausschalten
-  digitalWrite(ledPin2, LOW); 
+  digitalWrite(NOSFoggerPIN, LOW); 
 
  // set up the LCD's number of columns and rows: 
   lcd.begin(16, 2);
@@ -56,7 +56,7 @@ void setup() {
     lcd.print("   Controller   ");
   delay(5000);
  
-   buttonState = digitalRead(buttonPin); // abfrage beim einschalten 
+   buttonState = digitalRead(TransbrakePIN); // abfrage beim einschalten 
 
 // default werte herstellen beim einschalten
 
@@ -72,7 +72,7 @@ void setup() {
  
   do
     {
-     buttonState = digitalRead(buttonPin);
+     buttonState = digitalRead(TransbrakePIN);
      lcd.setCursor(0, 0);
      lcd.print("Release Button  "); 
     } 
@@ -119,8 +119,9 @@ void loop(){
  
    }
    
-    buttonState = digitalRead(buttonPin); // abfrage transbrake
-    if ( buttonState == HIGH ) {digitalWrite(ledPin1, HIGH);
+    buttonState = digitalRead(TransbrakePIN); // abfrage transbrake
+    if ( buttonState == HIGH ) {
+      //digitalWrite(ledPin1, HIGH);
   
      lcd.setCursor(0, 0);
         lcd.print("   Transbrake   ");
@@ -130,11 +131,13 @@ void loop(){
    
    
     else
-  {digitalWrite(ledPin1, LOW);}
+  {
+  //digitalWrite(ledPin1, LOW);
+}
     keyPress = analogRead(0); 
 if (keyPress < 600 && keyPress > 400 ) {nosactive = 1;}
   
- buttonState = digitalRead(buttonPin); // abfrage ob transbrake gedrückt
+ buttonState = digitalRead(TransbrakePIN); // abfrage ob transbrake gedrückt
 
 
 // Abfrage der steigenden flanke des Transbrake Buttons
@@ -171,7 +174,7 @@ if (buttonState == LOW && x==1 ) {
  vDelay = mDelay - lastDelay;  // Differenz zum letzten Durchlauf berechnen
   
    if (vDelay > Delay * 1000 && n == 0) { 
-    digitalWrite(ledPin2, HIGH);
+    digitalWrite(NOSFoggerPIN, HIGH);
  
  
 lastNOS = mDelay ;
@@ -180,15 +183,15 @@ lastNOS = mDelay ;
    vNOS = mDelay - lastNOS;
    
   if (vNOS > NOS * 1000 && n == 1){ 
-    digitalWrite(ledPin2, LOW);  // nos dauer
+    digitalWrite(NOSFoggerPIN, LOW);  // nos dauer
     nosactive = 0;
      n = 0 ;
      
       }
- buttonState = digitalRead(buttonPin); // abfrage während des laufes
+ buttonState = digitalRead(TransbrakePIN); // abfrage während des laufes
    
 if (buttonState == HIGH && x==0 ) { // abbruch kriterium und neustart
-  digitalWrite(ledPin2, LOW);
+  digitalWrite(NOSFoggerPIN, LOW);
   nosactive = 0;
   n=0;
   x=1;

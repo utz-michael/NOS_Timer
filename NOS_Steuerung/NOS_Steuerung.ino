@@ -21,7 +21,7 @@ int buttonState = LOW;         // variable for reading the pushbutton status
 int ledState = LOW;             // ledState used to set the LED
 int n = 0;                    // indikator ob Delay_Fogger durchgelaufen
 long previousMillis = 0;        // will store last time LED was updated
-long interval = 3000;           // LCD blink geschwindigkeit
+long interval = 200;           // LCD blink geschwindigkeit
 
 volatile int nosactive = 0; // nos status fÃ¼r interupt
 
@@ -90,7 +90,7 @@ delay(1000);
 
  
 nosactive = 0; // nos sicher deaktivieren
-
+anzeige (); // Aufruf anzeige
 }
 void loop(){
    
@@ -98,30 +98,13 @@ void loop(){
   
    if(currentMillis - previousMillis > interval) {
      // save the last time you blinked the LCD 
-     previousMillis = currentMillis;   
-
-     // if the LED is off turn it on and vice-versa:
-     if (ledState == LOW){
-       ledState = HIGH;
-    lcd.setCursor(0, 0);
-    lcd.print("NOSFogger delay:");
-    lcd.setCursor(0, 1);
-    lcd.print(Delay_Fogger);
-    lcd.print("ms          ");
-     }
-     else
-     {
-       ledState = LOW;
-    lcd.setCursor(0, 0);
-    keyPress = analogRead(0); 
-    lcd.print("NOSFogger active");
-    lcd.setCursor(0, 1);
-    lcd.print(NOS_Fogger);
+     previousMillis = currentMillis;    
+        lcd.scrollDisplayLeft();
     
-    lcd.print("ms          ");
-     }
- 
    }
+    
+ 
+   
    
     buttonState = digitalRead(TransbrakePIN); // abfrage transbrake
     if ( buttonState == HIGH ) {
@@ -202,9 +185,9 @@ if (buttonState == HIGH && x==0 ) { // abbruch kriterium und neustart
  }
  }
      while (nosactive == 1);   
-  delay (500); //Blocken nach run     
+  delay (2000); //Blocken nach run     
   lcd.clear();
-        
+  anzeige (); // Aufruf anzeige      
       
       
 
@@ -316,12 +299,102 @@ nosactive = 0;
   
    //------------------------------
        
-       
+//start Plate setup       
+   lcd.clear();
+   // setup start delay  ------------------------------------------------------------------------------------
+      do
+{
+      lcd.setCursor(0, 0);
+      lcd.print("SetupPlateDelay");
+      lcd.setCursor(0, 1);
+      lcd.print(Delay_Plate);
+      lcd.print("ms        ");
+      
+      keyPress = analogRead(0);
+      // up
+   if(keyPress < 221 && keyPress > 66 ){
+        Delay_Plate = Delay_Plate + 100;
+        if (Delay_Plate >= 10000){Delay_Plate = 10000;}
+     // Teste entprellen
+     do {
+     keyPress = analogRead(0); 
+  }while (keyPress < 900 ); 
+  //------------------------------ 
+    }
+      
+         // down
+  if(keyPress < 395 && keyPress > 230 ){
+        Delay_Plate = Delay_Plate - 100;
+        if (Delay_Plate <= 0){Delay_Plate = 0;}
+    if (Delay_Plate >= 10000){Delay_Plate = 0;  
+    }
+  // Teste entprellen
+       do {
+     keyPress = analogRead(0); 
+  }while (keyPress < 900 ); 
+  //------------------------------
+    }
+     
+      
+      
+      } while (keyPress > 50 ); // rechte taste abfragen
+   // Teste entprellen    
+       do {
+     keyPress = analogRead(0); 
+  }while (keyPress < 900 );
   
+   //------------------------------
+      
+      // Nos dauer einstellen ------------------------------------------------------------------------------
+      lcd.clear();
+       do
+{
+      lcd.setCursor(0, 0);
+      lcd.print("SetupPlatelengt");
+      lcd.setCursor(0, 1);
+      lcd.print(NOS_Plate);
+      lcd.print("ms        ");
+    
+      
+     keyPress = analogRead(0);
+      // up
+   if(keyPress < 221 && keyPress > 66 ){
+        NOS_Plate = NOS_Plate + 100;
+        if (NOS_Plate >= 20000){NOS_Plate = 20000;}
+     
+     
+       // Teste entprellen
+     do {
+     keyPress = analogRead(0); 
+  }while (keyPress < 900 ); 
+  //------------------------------ 
+      }
+     
+         // down
+    if(keyPress < 395 && keyPress > 230 ){
+        NOS_Plate = NOS_Plate - 100;
+        if (NOS_Plate <= 0){NOS_Plate = 0;}
+      if (NOS_Plate >= 20000){NOS_Plate = 0;} 
+   // Teste entprellen
+       do {
+     keyPress = analogRead(0); 
+  }while (keyPress < 900 ); 
+  //------------------------------
+    }
+     
+      
+      
+      } while (keyPress > 50 ); // rechte taste abfragen
+   // Teste entprellen    
+       do {
+     keyPress = analogRead(0); 
+  }while (keyPress < 900 );
+  
+   //------------------------------
       
   lcd.clear();
    writemem ();   // daten speichern
- 
+ anzeige (); // Aufruf anzeige
      
     } 
 
@@ -372,6 +445,24 @@ void readmem () {
 return;
 }
 
-
+void anzeige () {
+  lcd.setCursor(0, 0);
+ 
+     lcd.print("Fogger delay/duration: ");
+    lcd.print(Delay_Fogger);
+    lcd.print(" / ");
+    keyPress = analogRead(0); 
+    lcd.print(NOS_Fogger);    
+    lcd.print("ms ");
+    lcd.setCursor(0, 1);
+    lcd.print("Plate  delay/duration: ");
+    lcd.print(Delay_Plate);
+    lcd.print(" / ");
+    keyPress = analogRead(0); 
+    lcd.print(NOS_Plate);    
+    lcd.print("ms ");
+    
+    return;
+    }
  
 

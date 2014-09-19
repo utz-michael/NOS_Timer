@@ -9,7 +9,7 @@ LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 const int TransbrakePIN = 2;     // the number of the pushbutton pin Transbrake Button
 //const int ledPin1 =  13;      // the number of the LED pin Tranbrake
 const int NOSFoggerPIN =  12;      // the number of the LED pin NOS
-const int NOSPlatePIN =  13;
+const int NOSPlatePIN =  11;
 
 
 // variables will change:
@@ -41,6 +41,8 @@ unsigned long Delay_Plate = 100;  // default wert
 int x = 0;
 
 void setup() {
+  
+  
   // initialize the LED pin as an output:
 
 //  pinMode(ledPin1, OUTPUT);     // Transbarke Indikator nicht genutzt
@@ -125,7 +127,9 @@ void loop(){
   //digitalWrite(ledPin1, LOW);
 }
     keyPress = analogRead(0); 
-if (keyPress < 600 && keyPress > 400 ) {nosactive = 1;}
+if (keyPress < 600 && keyPress > 400 ) {nosactive = 1;
+nosactivePlate = 1; 
+}
   
  buttonState = digitalRead(TransbrakePIN); // abfrage ob transbrake gedrückt
 
@@ -140,19 +144,20 @@ if (keyPress < 600 && keyPress > 400 ) {nosactive = 1;}
 // Abfrage der fallenden Flanke des Transbrake Buttons     
 if (buttonState == LOW && x==1 ) { 
   nosactive = 1; // nos timer einschalten
+  nosactivePlate = 1; // nos timer einschalten
   x=0; //Flanken dedektierung zurücksetzen
   }
-  
 
  //nos starten ------------------------------------------------------------------------------------------------------------------------------------------------
- if (nosactive == 1 || nosactivePlate == 1) {
+ if ((nosactive == 1) || (nosactivePlate == 1) ) {
+   
+   
    mDelay = micros(); // zeit speichern am anfang der warteschleife
    lastDelay = mDelay;
    lcd.clear();
    do {
  
-    
-    
+  
       lcd.setCursor(0, 0);
         lcd.print("   Go Baby Go   ");
       lcd.setCursor(0, 1);
@@ -189,13 +194,13 @@ lastNOSplate = mDelay ;
   if (vNOS > NOS_Fogger * 1000 && n == 1){ 
     digitalWrite(NOSFoggerPIN, LOW);  // nos dauer
     nosactive = 0;
-     n = 0 ;
+    // n = 0 ;
      
       }
     if (vNOSplate > NOS_Plate * 1000 && m == 1){ 
     digitalWrite(NOSPlatePIN, LOW);  // nos dauer
     nosactivePlate = 0;
-     m = 0 ;
+   //  m = 0 ;
      
       }   
       
@@ -214,7 +219,9 @@ if (buttonState == HIGH && x==0 ) { // abbruch kriterium und neustart
   x=1;
  }
  }
-     while (nosactive == 1 || nosactivePlate == 1);   
+     while ((nosactive == 1) || (nosactivePlate == 1)   ); 
+   m=0;  
+   n=0;
   delay (2000); //Blocken nach run     
   lcd.clear();
   anzeige (); // Aufruf anzeige      

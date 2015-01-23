@@ -1,4 +1,0 @@
-Release  V1.0 
-
-- zweite stufe eingebaut
-- Beschriftung

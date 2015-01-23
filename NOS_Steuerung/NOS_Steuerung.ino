@@ -32,9 +32,7 @@ unsigned long vNOS = 0;
 unsigned long mDelay;
 unsigned long vDelay;
 unsigned long NOS_Fogger = 1000;    // default wert  
-unsigned long Delay_Fogger = 300;  // default wert
-unsigned long NOS_Plate = 1000;    // default wert  
-unsigned long Delay_Plate = 100;  // default wert
+unsigned long Delay_Fogger = 500;  // default wert
 int x = 0;
 
 void setup() {
@@ -104,7 +102,7 @@ void loop(){
      if (ledState == LOW){
        ledState = HIGH;
     lcd.setCursor(0, 0);
-    lcd.print("NOSFogger delay:");
+    lcd.print("NOS start delay:");
     lcd.setCursor(0, 1);
     lcd.print(Delay_Fogger);
     lcd.print("ms          ");
@@ -114,7 +112,7 @@ void loop(){
        ledState = LOW;
     lcd.setCursor(0, 0);
     keyPress = analogRead(0); 
-    lcd.print("NOSFogger active");
+    lcd.print("NOS active:     ");
     lcd.setCursor(0, 1);
     lcd.print(NOS_Fogger);
     
@@ -229,7 +227,7 @@ nosactive = 0;
       do
 {
       lcd.setCursor(0, 0);
-      lcd.print("SetupFoggerDelay");
+      lcd.print("Setup Delay    ");
       lcd.setCursor(0, 1);
       lcd.print(Delay_Fogger);
       lcd.print("ms        ");
@@ -274,7 +272,7 @@ nosactive = 0;
        do
 {
       lcd.setCursor(0, 0);
-      lcd.print("SetupFoggerlengt");
+      lcd.print("Setup NOS length");
       lcd.setCursor(0, 1);
       lcd.print(NOS_Fogger);
       lcd.print("ms        ");

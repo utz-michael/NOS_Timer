@@ -334,20 +334,12 @@ void writemem () {
   byte secondByte = byte(Delay_Fogger & 0x00FF);
   byte thirdByte = byte(NOS_Fogger >> 8);
   byte forthByte = byte(NOS_Fogger & 0x00FF);
-  byte fifthByte = byte(Delay_Plate >> 8);
-  byte sixthByte = byte(Delay_Plate & 0x00FF);
-  byte seventhByte = byte(NOS_Plate >> 8);
-  byte eightByte = byte(NOS_Plate & 0x00FF);
  
     //eeprom schreiben
       EEPROM.write(0, firstByte);
       EEPROM.write(1, secondByte);
       EEPROM.write(2, thirdByte);
       EEPROM.write(3, forthByte);
-      EEPROM.write(4, fifthByte);
-      EEPROM.write(5, sixthByte);
-      EEPROM.write(6, seventhByte);
-      EEPROM.write(7, eightByte);
    
       return;
 }
@@ -359,16 +351,11 @@ void readmem () {
    byte  secondByte = EEPROM.read(1);
    byte  thirdByte = EEPROM.read(2);
    byte  forthByte = EEPROM.read(3);
-   byte fifthByte = EEPROM.read(4);
-   byte sixthByte = EEPROM.read(5);
-   byte seventhByte = EEPROM.read(6);
-   byte eightByte = EEPROM.read(7);
  
   //byte in integer wandeln   
    Delay_Fogger = int(firstByte << 8) + int(secondByte);
    NOS_Fogger = int(thirdByte << 8) + int(forthByte);
-  Delay_Plate = int(fifthByte << 8) + int(sixthByte);
-   NOS_Plate = int(seventhByte << 8) + int(eightByte);
+  
 return;
 }
 

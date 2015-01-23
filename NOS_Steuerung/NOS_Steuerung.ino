@@ -9,7 +9,7 @@ LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 const int TransbrakePIN = 2;     // the number of the pushbutton pin Transbrake Button
 //const int ledPin1 =  13;      // the number of the LED pin Tranbrake
 const int NOSFoggerPIN =  12;      // the number of the LED pin NOS
-const int NOSPlatePIN =  13;
+
 
 
 // variables will change:
@@ -19,7 +19,7 @@ int buttonState = LOW;         // variable for reading the pushbutton status
 
 
 int ledState = LOW;             // ledState used to set the LED
-int n = 0;                    // indikator ob Delay_Fogger durchgelaufen
+int n = 0;                    // indikator ob delay durchgelaufen
 long previousMillis = 0;        // will store last time LED was updated
 long interval = 3000;           // LCD blink geschwindigkeit
 
@@ -31,16 +31,15 @@ unsigned long vNOS = 0;
 
 unsigned long mDelay;
 unsigned long vDelay;
-unsigned long NOS_Fogger = 1000;    // default wert  
-unsigned long Delay_Fogger = 500;  // default wert
+unsigned long NOS = 1000;    // default wert  
+unsigned long Delay = 500;  // default wert
 int x = 0;
 
 void setup() {
   // initialize the LED pin as an output:
 
 //  pinMode(ledPin1, OUTPUT);     // Transbarke Indikator nicht genutzt
-  pinMode(NOSFoggerPIN, OUTPUT);    // Nos Fogger output
-  pinMode(NOSPlatePIN, OUTPUT);    // Nos Plate output
+  pinMode(NOSFoggerPIN, OUTPUT);    // Nos Aktiv
 
   
   // initialize the pushbutton pin as an input:
@@ -48,7 +47,6 @@ void setup() {
   
  //NOS ausgang ausschalten
   digitalWrite(NOSFoggerPIN, LOW); 
-  digitalWrite(NOSPlatePIN, LOW); 
 
  // set up the LCD's number of columns and rows: 
   lcd.begin(16, 2);
@@ -104,7 +102,7 @@ void loop(){
     lcd.setCursor(0, 0);
     lcd.print("NOS start delay:");
     lcd.setCursor(0, 1);
-    lcd.print(Delay_Fogger);
+    lcd.print(Delay);
     lcd.print("ms          ");
      }
      else
@@ -114,7 +112,7 @@ void loop(){
     keyPress = analogRead(0); 
     lcd.print("NOS active:     ");
     lcd.setCursor(0, 1);
-    lcd.print(NOS_Fogger);
+    lcd.print(NOS);
     
     lcd.print("ms          ");
      }
@@ -175,7 +173,7 @@ if (buttonState == LOW && x==1 ) {
  mDelay = micros();                 // MicrosekundenzÃ¤hler auslesen
  vDelay = mDelay - lastDelay;  // Differenz zum letzten Durchlauf berechnen
   
-   if (vDelay > Delay_Fogger * 1000 && n == 0) { 
+   if (vDelay > Delay * 1000 && n == 0) { 
     digitalWrite(NOSFoggerPIN, HIGH);
  
  
@@ -184,7 +182,7 @@ lastNOS = mDelay ;
   }
    vNOS = mDelay - lastNOS;
    
-  if (vNOS > NOS_Fogger * 1000 && n == 1){ 
+  if (vNOS > NOS * 1000 && n == 1){ 
     digitalWrite(NOSFoggerPIN, LOW);  // nos dauer
     nosactive = 0;
      n = 0 ;
@@ -229,14 +227,14 @@ nosactive = 0;
       lcd.setCursor(0, 0);
       lcd.print("Setup Delay    ");
       lcd.setCursor(0, 1);
-      lcd.print(Delay_Fogger);
+      lcd.print(Delay);
       lcd.print("ms        ");
       
       keyPress = analogRead(0);
       // up
    if(keyPress < 221 && keyPress > 66 ){
-        Delay_Fogger = Delay_Fogger + 100;
-        if (Delay_Fogger >= 10000){Delay_Fogger = 10000;}
+        Delay = Delay + 100;
+        if (Delay >= 10000){Delay = 10000;}
      // Teste entprellen
      do {
      keyPress = analogRead(0); 
@@ -246,9 +244,9 @@ nosactive = 0;
       
          // down
   if(keyPress < 395 && keyPress > 230 ){
-        Delay_Fogger = Delay_Fogger - 100;
-        if (Delay_Fogger <= 0){Delay_Fogger = 0;}
-    if (Delay_Fogger >= 10000){Delay_Fogger = 0;  
+        Delay = Delay - 100;
+        if (Delay <= 0){Delay = 0;}
+    if (Delay >= 10000){Delay = 0;  
     }
   // Teste entprellen
        do {
@@ -274,15 +272,15 @@ nosactive = 0;
       lcd.setCursor(0, 0);
       lcd.print("Setup NOS length");
       lcd.setCursor(0, 1);
-      lcd.print(NOS_Fogger);
+      lcd.print(NOS);
       lcd.print("ms        ");
     
       
      keyPress = analogRead(0);
       // up
    if(keyPress < 221 && keyPress > 66 ){
-        NOS_Fogger = NOS_Fogger + 100;
-        if (NOS_Fogger >= 20000){NOS_Fogger = 20000;}
+        NOS = NOS + 100;
+        if (NOS >= 20000){NOS = 20000;}
      
      
        // Teste entprellen
@@ -294,9 +292,9 @@ nosactive = 0;
      
          // down
     if(keyPress < 395 && keyPress > 230 ){
-        NOS_Fogger = NOS_Fogger - 100;
-        if (NOS_Fogger <= 0){NOS_Fogger = 0;}
-      if (NOS_Fogger >= 20000){NOS_Fogger = 0;} 
+        NOS = NOS - 100;
+        if (NOS <= 0){NOS = 0;}
+      if (NOS >= 20000){NOS = 0;} 
    // Teste entprellen
        do {
      keyPress = analogRead(0); 
@@ -328,10 +326,10 @@ nosactive = 0;
 void writemem () {
   
 // integer in byte umwandeln
-  byte firstByte = byte(Delay_Fogger >> 8);
-  byte secondByte = byte(Delay_Fogger & 0x00FF);
-  byte thirdByte = byte(NOS_Fogger >> 8);
-  byte forthByte = byte(NOS_Fogger & 0x00FF);
+  byte firstByte = byte(Delay >> 8);
+  byte secondByte = byte(Delay & 0x00FF);
+  byte thirdByte = byte(NOS >> 8);
+  byte forthByte = byte(NOS & 0x00FF);
  
     //eeprom schreiben
       EEPROM.write(0, firstByte);
@@ -351,8 +349,8 @@ void readmem () {
    byte  forthByte = EEPROM.read(3);
  
   //byte in integer wandeln   
-   Delay_Fogger = int(firstByte << 8) + int(secondByte);
-   NOS_Fogger = int(thirdByte << 8) + int(forthByte);
+   Delay = int(firstByte << 8) + int(secondByte);
+   NOS = int(thirdByte << 8) + int(forthByte);
   
 return;
 }

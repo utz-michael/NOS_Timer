@@ -8,13 +8,14 @@ LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 // set pin numbers:
 const int TransbrakePIN = 2;     // the number of the pushbutton pin Transbrake Button
 //const int ledPin1 =  13;      // the number of the LED pin Tranbrake
-const int NOSFoggerPIN =  12;      // the number of the LED pin NOS
+const int NOSFoggerPIN =  3;      // the number of the LED pin NOS
 
 
 
 // variables will change:
 int keyPress;                  // LCD Button
 int buttonState = LOW;         // variable for reading the pushbutton status
+int test;
         //
 
 
@@ -54,13 +55,14 @@ void setup() {
 Serial.begin(9600);
 //  pinMode(ledPin1, OUTPUT);     // Transbarke Indikator nicht genutzt
   pinMode(NOSFoggerPIN, OUTPUT);    // Nos Aktiv
-
+  
   
   // initialize the pushbutton pin as an input:
   pinMode(TransbrakePIN, INPUT);     //transbrake
   
  //NOS ausgang ausschalten
   digitalWrite(NOSFoggerPIN, LOW); 
+  
 // SPI Wiederstand setup
  SPI.begin();
  SPI.setBitOrder(MSBFIRST); //We know this from the Data Sheet
@@ -199,7 +201,7 @@ if (buttonState == LOW && x==1 ) {
  
     
     
-      
+   /*   
    lcd.setCursor(0, 0);
    lcd.print("delay:");
    lcd.setCursor(7, 0);
@@ -210,7 +212,7 @@ if (buttonState == LOW && x==1 ) {
    lcd.print("Retard:");
    lcd.setCursor(9, 1);
     lcd.print(Retard);
-    
+    */
           
  mDelay = micros();           // MicrosekundenzÃ¤hler auslesen
  vDelay = mDelay - lastDelay;  // Differenz zum letzten Durchlauf berechnen
@@ -243,13 +245,16 @@ if (buttonState == HIGH && x==0 ) { // abbruch kriterium und neustart
  //---------------------------------------------------------------------
  // Retart steuerung
  
-  RetardEingang = digitalSmooth(analogRead(0), sensSmoothArray1) ; // einlesen und Filtern der Analogen Spannung vom REVO Controller
+  RetardEingang = digitalSmooth(analogRead(5), sensSmoothArray1) ; // einlesen und Filtern der Analogen Spannung vom REVO Controller
    //----- Berechnung des Wiederstandes und des Retards------------------------------------------------
-  Retard =  MaxHP/(1024/RetardEingang)/50.0*RetardCourve;
+    
+   
+  Retard =  ((MaxHP/(1023.0/RetardEingang)) /50.0)*RetardCourve;
+  
   WiederstandRAW = Retard *1000.0 /48.828125 ; 
   
   digitalPotWrite(0,WiederstandRAW); // Wiederstandswert setzen  48.82 Ohm pro einheit 
- 
+ test++;
  //-------------------------------------------------------------------------------------------------
  
  
@@ -258,8 +263,10 @@ if (buttonState == HIGH && x==0 ) { // abbruch kriterium und neustart
      while (nosactive == 1);  
     
     
-     
-  delay (500); //Blocken nach run     
+   Serial.println(test);  
+   test = 0;
+  delay (500); //Blocken nach run    
+  
   lcd.clear();
         
       
@@ -437,9 +444,9 @@ digitalPotWrite(0,0); //  Retard ausschalten Wiederstandswert setzen  48.82 Ohm 
   
 }
 void writemem () {
-   Serial.println(RetardCourve);
+   
   retard = RetardCourve * 10.0;
-   Serial.println(retard);
+   
 // integer in byte umwandeln
   byte firstByte = byte(Delay >> 8);
   byte secondByte = byte(Delay & 0x00FF);
@@ -473,9 +480,9 @@ void readmem () {
    Delay = int(firstByte << 8) + int(secondByte);
    NOS = int(thirdByte << 8) + int(forthByte);
    retard = int(fifthByte << 8) + int (sixthByte);
-   Serial.println(retard);
+   
     RetardCourve = retard / 10.0;
-    Serial.println(RetardCourve);
+    
 return;
 }
 

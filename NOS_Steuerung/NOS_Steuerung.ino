@@ -35,6 +35,9 @@ unsigned long NOS = 1000;    // default wert
 unsigned long Delay = 500;  // default wert
 int x = 0;
 
+float RetardCourve = 1.5 ; //Retard kurve 1.0 bis 3.0 per 50 ps NOS
+float Retard = 1.5 ; // aktuell gesetztes retard
+int retard;
 void setup() {
   // initialize the LED pin as an output:
 
@@ -81,6 +84,7 @@ void setup() {
   lcd.clear();
 
    readmem (); // eeprom lesen
+  
  lcd.setCursor(0, 0);
 delay(1000); 
 
@@ -100,21 +104,27 @@ void loop(){
      if (ledState == LOW){
        ledState = HIGH;
     lcd.setCursor(0, 0);
-    lcd.print("NOS start delay:");
-    lcd.setCursor(0, 1);
+    lcd.print("delay:");
+    lcd.setCursor(7, 0);
     lcd.print(Delay);
-    lcd.print("ms          ");
+    lcd.setCursor(11, 0);
+    lcd.print("ms");
+    lcd.setCursor(0, 1);
+    keyPress = analogRead(0); 
+    lcd.print("duration:");
+    lcd.setCursor(11, 1);
+    lcd.print(NOS);
+    lcd.setCursor(15, 1);
+    lcd.print("ms");
      }
      else
      {
        ledState = LOW;
     lcd.setCursor(0, 0);
     keyPress = analogRead(0); 
-    lcd.print("NOS active:     ");
-    lcd.setCursor(0, 1);
-    lcd.print(NOS);
-    
-    lcd.print("ms          ");
+    lcd.print("Retard per 50HP");
+    lcd.setCursor(7, 1);
+    lcd.print(RetardCourve);
      }
  
    }
@@ -163,14 +173,21 @@ if (buttonState == LOW && x==1 ) {
  
     
     
-      lcd.setCursor(0, 0);
-        lcd.print("   Go Baby Go   ");
-      lcd.setCursor(0, 1);
- 
-   lcd.print(vDelay / 1000); // ausgabe zeit 
-   lcd.print("ms");    // einschalt verzÃ¶gerung 
-        
- mDelay = micros();                 // MicrosekundenzÃ¤hler auslesen
+      
+   lcd.setCursor(0, 0);
+   lcd.print("delay:");
+   lcd.setCursor(7, 0);
+    lcd.print(vDelay / 1000); // ausgabe zeit 
+    lcd.setCursor(11, 0);
+    lcd.print("ms");
+   lcd.setCursor(0, 12);
+   lcd.print("Retard:");
+   lcd.setCursor(9, 1);
+    lcd.print(Retard);
+    lcd.setCursor(1, 12);
+    lcd.print("°");
+          
+ mDelay = micros();           // MicrosekundenzÃ¤hler auslesen
  vDelay = mDelay - lastDelay;  // Differenz zum letzten Durchlauf berechnen
   
    if (vDelay > Delay * 1000 && n == 0) { 
@@ -311,7 +328,54 @@ nosactive = 0;
   }while (keyPress < 900 );
   
    //------------------------------
-       
+
+
+      // Retard einstellen ------------------------------------------------------------------------------
+      lcd.clear();
+       do
+{
+      lcd.setCursor(0, 0);
+      lcd.print("Retard per 50 HP");
+      lcd.setCursor(0, 1);
+      lcd.print(Retard);
+      lcd.print("°");
+    
+      
+     keyPress = analogRead(0);
+      // up
+   if(keyPress < 221 && keyPress > 66 ){
+        Retard = Retard + 0.10;
+        if (Retard >= 3.00){Retard = 3.00;}
+     
+     
+       // Teste entprellen
+     do {
+     keyPress = analogRead(0); 
+  }while (keyPress < 900 ); 
+  //------------------------------ 
+      }
+     
+         // down
+    if(keyPress < 395 && keyPress > 230 ){
+        Retard = Retard - 0.1;
+        if (Retard <= 1.0){Retard = 1.0;}
+      if (Retard >= 3.0){Retard = 1.0;} 
+   // Teste entprellen
+       do {
+     keyPress = analogRead(0); 
+  }while (keyPress < 900 ); 
+  //------------------------------
+    }
+     
+      
+      
+      } while (keyPress > 50 ); // rechte taste abfragen
+   // Teste entprellen    
+       do {
+     keyPress = analogRead(0); 
+  }while (keyPress < 900 );
+  
+   //------------------------------       
        
   
       
@@ -324,18 +388,22 @@ nosactive = 0;
   
 }
 void writemem () {
-  
+  retard = Retard * 10;
 // integer in byte umwandeln
   byte firstByte = byte(Delay >> 8);
   byte secondByte = byte(Delay & 0x00FF);
   byte thirdByte = byte(NOS >> 8);
   byte forthByte = byte(NOS & 0x00FF);
+  byte fifthByte = byte(retard >> 8);
+  byte sixthByte = byte(retard & 0x00FF);
  
     //eeprom schreiben
       EEPROM.write(0, firstByte);
       EEPROM.write(1, secondByte);
       EEPROM.write(2, thirdByte);
       EEPROM.write(3, forthByte);
+      EEPROM.write(4, fifthByte);
+      EEPROM.write(5, sixthByte);
    
       return;
 }
@@ -347,11 +415,14 @@ void readmem () {
    byte  secondByte = EEPROM.read(1);
    byte  thirdByte = EEPROM.read(2);
    byte  forthByte = EEPROM.read(3);
+   byte  fifthByte = EEPROM.read(4);
+   byte  sixthByte = EEPROM.read(5);
  
   //byte in integer wandeln   
    Delay = int(firstByte << 8) + int(secondByte);
    NOS = int(thirdByte << 8) + int(forthByte);
-  
+   retard = int(fifthByte << 8) + int (sixthByte);
+    Retard = retard / 10;
 return;
 }
 

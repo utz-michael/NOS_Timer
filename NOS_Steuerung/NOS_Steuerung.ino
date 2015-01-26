@@ -51,7 +51,7 @@ const int csPin = 10;
 
 void setup() {
   // initialize the LED pin as an output:
-
+Serial.begin(9600);
 //  pinMode(ledPin1, OUTPUT);     // Transbarke Indikator nicht genutzt
   pinMode(NOSFoggerPIN, OUTPUT);    // Nos Aktiv
 
@@ -127,6 +127,7 @@ void loop(){
      // if the LED is off turn it on and vice-versa:
      if (ledState == LOW){
        ledState = HIGH;
+       lcd.clear();
     lcd.setCursor(0, 0);
     lcd.print("delay:");
     lcd.setCursor(7, 0);
@@ -136,18 +137,19 @@ void loop(){
     lcd.setCursor(0, 1);
     keyPress = analogRead(0); 
     lcd.print("duration:");
-    lcd.setCursor(11, 1);
+    lcd.setCursor(10, 1);
     lcd.print(NOS);
-    lcd.setCursor(15, 1);
+    lcd.setCursor(14, 1);
     lcd.print("ms");
      }
      else
      {
        ledState = LOW;
+       lcd.clear();
     lcd.setCursor(0, 0);
     keyPress = analogRead(0); 
     lcd.print("Retard per 50HP");
-    lcd.setCursor(7, 1);
+    lcd.setCursor(6, 1);
     lcd.print(RetardCourve);
      }
  
@@ -208,8 +210,7 @@ if (buttonState == LOW && x==1 ) {
    lcd.print("Retard:");
    lcd.setCursor(9, 1);
     lcd.print(Retard);
-    lcd.setCursor(1, 12);
-    lcd.print("°");
+    
           
  mDelay = micros();           // MicrosekundenzÃ¤hler auslesen
  vDelay = mDelay - lastDelay;  // Differenz zum letzten Durchlauf berechnen
@@ -244,8 +245,8 @@ if (buttonState == HIGH && x==0 ) { // abbruch kriterium und neustart
  
   RetardEingang = digitalSmooth(analogRead(0), sensSmoothArray1) ; // einlesen und Filtern der Analogen Spannung vom REVO Controller
    //----- Berechnung des Wiederstandes und des Retards------------------------------------------------
-  Retard =  MaxHP/(1024/RetardEingang)/50*RetardCourve;
-  WiederstandRAW = Retard *1000 /48.828125 ; 
+  Retard =  MaxHP/(1024/RetardEingang)/50.0*RetardCourve;
+  WiederstandRAW = Retard *1000.0 /48.828125 ; 
   
   digitalPotWrite(0,WiederstandRAW); // Wiederstandswert setzen  48.82 Ohm pro einheit 
  
@@ -386,7 +387,7 @@ digitalPotWrite(0,0); //  Retard ausschalten Wiederstandswert setzen  48.82 Ohm 
       lcd.print("Retard per 50 HP");
       lcd.setCursor(0, 1);
       lcd.print(RetardCourve);
-      lcd.print("°");
+      
     
       
      keyPress = analogRead(0);
@@ -436,7 +437,9 @@ digitalPotWrite(0,0); //  Retard ausschalten Wiederstandswert setzen  48.82 Ohm 
   
 }
 void writemem () {
-  retard = RetardCourve * 10;
+   Serial.println(RetardCourve);
+  retard = RetardCourve * 10.0;
+   Serial.println(retard);
 // integer in byte umwandeln
   byte firstByte = byte(Delay >> 8);
   byte secondByte = byte(Delay & 0x00FF);
@@ -470,7 +473,9 @@ void readmem () {
    Delay = int(firstByte << 8) + int(secondByte);
    NOS = int(thirdByte << 8) + int(forthByte);
    retard = int(fifthByte << 8) + int (sixthByte);
-    RetardCourve = retard / 10;
+   Serial.println(retard);
+    RetardCourve = retard / 10.0;
+    Serial.println(RetardCourve);
 return;
 }
 

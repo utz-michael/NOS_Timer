@@ -1,5 +1,5 @@
 #include <EEPROM.h>
-
+#include <SPI.h> 
 #include <LiquidCrystal.h>
 
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
@@ -38,6 +38,17 @@ int x = 0;
 float RetardCourve = 1.5 ; //Retard kurve 1.0 bis 3.0 per 50 ps NOS
 float Retard = 1.5 ; // aktuell gesetztes retard
 int retard;
+int RetardEingang;
+int WiederstandRAW;
+int MaxHP =600; // Maximale Leistung bei eingang 5V muss auf den flow angepasst werden 
+// Rolling average
+#define filterSamples   9              // filterSamples should  be an odd number, no smaller than 3
+int sensSmoothArray1 [filterSamples];   // array for holding raw sensor values for sensor1 
+
+// spi port für wiederstand
+const int csPin = 10;
+
+
 void setup() {
   // initialize the LED pin as an output:
 
@@ -50,6 +61,19 @@ void setup() {
   
  //NOS ausgang ausschalten
   digitalWrite(NOSFoggerPIN, LOW); 
+// SPI Wiederstand setup
+ SPI.begin();
+ SPI.setBitOrder(MSBFIRST); //We know this from the Data Sheet
+
+ pinMode(csPin,OUTPUT);
+ digitalWrite(csPin, HIGH);
+ digitalPotWrite(0,0); //  Retard sicher ausschalten Wiederstandswert setzen  48.82 Ohm pro einheit
+
+
+
+
+
+
 
  // set up the LCD's number of columns and rows: 
   lcd.begin(16, 2);
@@ -90,7 +114,7 @@ delay(1000);
 
  
 nosactive = 0; // nos sicher deaktivieren
-
+digitalPotWrite(0,0); //  Retard sicher ausschalten Wiederstandswert setzen  48.82 Ohm pro einheit 
 }
 void loop(){
    
@@ -201,6 +225,7 @@ lastNOS = mDelay ;
    
   if (vNOS > NOS * 1000 && n == 1){ 
     digitalWrite(NOSFoggerPIN, LOW);  // nos dauer
+    digitalPotWrite(0,0); //  Retard ausschalten Wiederstandswert setzen  48.82 Ohm pro einheit
     nosactive = 0;
      n = 0 ;
      
@@ -209,12 +234,30 @@ lastNOS = mDelay ;
    
 if (buttonState == HIGH && x==0 ) { // abbruch kriterium und neustart
   digitalWrite(NOSFoggerPIN, LOW);
+  digitalPotWrite(0,0); //  Retard ausschalten Wiederstandswert setzen  48.82 Ohm pro einheit
   nosactive = 0;
   n=0;
   x=1;
  }
+ //---------------------------------------------------------------------
+ // Retart steuerung
+ 
+  RetardEingang = digitalSmooth(analogRead(0), sensSmoothArray1) ; // einlesen und Filtern der Analogen Spannung vom REVO Controller
+   //----- Berechnung des Wiederstandes und des Retards------------------------------------------------
+  Retard =  MaxHP/(1024/RetardEingang)/50*RetardCourve;
+  WiederstandRAW = Retard *1000 /48.828125 ; 
+  
+  digitalPotWrite(0,WiederstandRAW); // Wiederstandswert setzen  48.82 Ohm pro einheit 
+ 
+ //-------------------------------------------------------------------------------------------------
+ 
+ 
+ 
  }
-     while (nosactive == 1);   
+     while (nosactive == 1);  
+    
+    
+     
   delay (500); //Blocken nach run     
   lcd.clear();
         
@@ -223,8 +266,13 @@ if (buttonState == HIGH && x==0 ) { // abbruch kriterium und neustart
 
 
  }
-   else {nosactive = 0;}
+   else {nosactive = 0;
+   digitalPotWrite(0,0); //  Retard ausschalten Wiederstandswert setzen  48.82 Ohm pro einheit 
+ }
 nosactive = 0;
+digitalPotWrite(0,0); //  Retard ausschalten Wiederstandswert setzen  48.82 Ohm pro einheit 
+
+
  // display button abfrage setup routine einschalten ------------------------------------------------
  
    keyPress = analogRead(0); 
@@ -337,15 +385,15 @@ nosactive = 0;
       lcd.setCursor(0, 0);
       lcd.print("Retard per 50 HP");
       lcd.setCursor(0, 1);
-      lcd.print(Retard);
+      lcd.print(RetardCourve);
       lcd.print("°");
     
       
      keyPress = analogRead(0);
       // up
    if(keyPress < 221 && keyPress > 66 ){
-        Retard = Retard + 0.10;
-        if (Retard >= 3.00){Retard = 3.00;}
+        RetardCourve = RetardCourve + 0.10;
+        if (RetardCourve >= 3.00){RetardCourve = 3.00;}
      
      
        // Teste entprellen
@@ -357,9 +405,9 @@ nosactive = 0;
      
          // down
     if(keyPress < 395 && keyPress > 230 ){
-        Retard = Retard - 0.1;
-        if (Retard <= 1.0){Retard = 1.0;}
-      if (Retard >= 3.0){Retard = 1.0;} 
+        RetardCourve = RetardCourve - 0.1;
+        if (RetardCourve <= 1.0){RetardCourve = 1.0;}
+      if (RetardCourve >= 3.0){RetardCourve = 1.0;} 
    // Teste entprellen
        do {
      keyPress = analogRead(0); 
@@ -388,7 +436,7 @@ nosactive = 0;
   
 }
 void writemem () {
-  retard = Retard * 10;
+  retard = RetardCourve * 10;
 // integer in byte umwandeln
   byte firstByte = byte(Delay >> 8);
   byte secondByte = byte(Delay & 0x00FF);
@@ -422,10 +470,75 @@ void readmem () {
    Delay = int(firstByte << 8) + int(secondByte);
    NOS = int(thirdByte << 8) + int(forthByte);
    retard = int(fifthByte << 8) + int (sixthByte);
-    Retard = retard / 10;
+    RetardCourve = retard / 10;
 return;
 }
 
+int digitalSmooth(int rawIn, int *sensSmoothArray){     // "int *sensSmoothArray" passes an array to the function - the asterisk indicates the array name is a pointer
+  int j, k, temp, top, bottom;
+  long total;
+  static int i;
+ // static int raw[filterSamples];
+  static int sorted[filterSamples];
+  boolean done;
 
- 
+  i = (i + 1) % filterSamples;    // increment counter and roll over if necc. -  % (modulo operator) rolls over variable
+  sensSmoothArray[i] = rawIn;                 // input new data into the oldest slot
+
+  // Serial.print("raw = ");
+
+  for (j=0; j<filterSamples; j++){     // transfer data array into anther array for sorting and averaging
+    sorted[j] = sensSmoothArray[j];
+  }
+
+  done = 0;                // flag to know when we're done sorting              
+  while(done != 1){        // simple swap sort, sorts numbers from lowest to highest
+    done = 1;
+    for (j = 0; j < (filterSamples - 1); j++){
+      if (sorted[j] > sorted[j + 1]){     // numbers are out of order - swap
+        temp = sorted[j + 1];
+        sorted [j+1] =  sorted[j] ;
+        sorted [j] = temp;
+        done = 0;
+      }
+    }
+  }
+
+/*
+  for (j = 0; j < (filterSamples); j++){    // print the array to debug
+    Serial.print(sorted[j]); 
+    Serial.print("   "); 
+  }
+  Serial.println();
+*/
+
+  // throw out top and bottom 15% of samples - limit to throw out at least one from top and bottom
+  bottom = max(((filterSamples * 15)  / 100), 1); 
+  top = min((((filterSamples * 85) / 100) + 1  ), (filterSamples - 1));   // the + 1 is to make up for asymmetry caused by integer rounding
+  k = 0;
+  total = 0;
+  for ( j = bottom; j< top; j++){
+    total += sorted[j];  // total remaining indices
+    k++; 
+    // Serial.print(sorted[j]); 
+    // Serial.print("   "); 
+  }
+
+//  Serial.println();
+//  Serial.print("average = ");
+//  Serial.println(total/k);
+  return total / k;    // divide by number of samples
+}
+
+void digitalPotWrite(int address, int value) {
+ digitalWrite(csPin, LOW); //select slave
+ byte command = 0xB0; //0xB0 = 10110000 
+ command += address; 
+ SPI.transfer(command); 
+ byte byte1 = (value >> 8);
+ byte byte0 = (value & 0xFF); //0xFF = B11111111
+ SPI.transfer(byte1);
+ SPI.transfer(byte0);
+ digitalWrite(csPin, HIGH); //de-select slave
+} 
 

@@ -196,12 +196,8 @@ if (buttonState == LOW && x==1 ) {
  if (nosactive == 1) {
    mDelay = micros(); // zeit speichern am anfang der warteschleife
    lastDelay = mDelay;
+   
    lcd.clear();
-   do {
- 
-    
-    
-   /*   
    lcd.setCursor(0, 0);
    lcd.print("delay:");
    lcd.setCursor(7, 0);
@@ -212,8 +208,19 @@ if (buttonState == LOW && x==1 ) {
    lcd.print("Retard:");
    lcd.setCursor(9, 1);
     lcd.print(Retard);
-    */
-          
+   do {
+ 
+    
+    
+    
+   
+    lcd.setCursor(7, 0);
+    lcd.print(vDelay / 1000); // ausgabe zeit 
+    lcd.setCursor(9, 1);
+    lcd.print(Retard);
+    
+    
+             
  mDelay = micros();           // MicrosekundenzÃ¤hler auslesen
  vDelay = mDelay - lastDelay;  // Differenz zum letzten Durchlauf berechnen
   

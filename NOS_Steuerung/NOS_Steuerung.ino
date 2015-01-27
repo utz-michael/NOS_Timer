@@ -41,6 +41,7 @@ float Retard = 1.5 ; // aktuell gesetztes retard
 int retard;
 int RetardEingang;
 int WiederstandRAW;
+int WiederstandRAW_Old = 0;
 int MaxHP =600; // Maximale Leistung bei eingang 5V muss auf den flow angepasst werden 
 // Rolling average
 #define filterSamples   9              // filterSamples should  be an odd number, no smaller than 3
@@ -255,7 +256,10 @@ if (buttonState == HIGH && x==0 ) { // abbruch kriterium und neustart
   
   WiederstandRAW = Retard *1000.0 /48.828125 ; 
   
+  if ( (WiederstandRAW_Old - WiederstandRAW) >= 2 || (WiederstandRAW -WiederstandRAW_Old) >= 2) {
   digitalPotWrite(0,WiederstandRAW); // Wiederstandswert setzen  48.82 Ohm pro einheit 
+  }
+  WiederstandRAW_Old = WiederstandRAW;
  test++;
  //-------------------------------------------------------------------------------------------------
  

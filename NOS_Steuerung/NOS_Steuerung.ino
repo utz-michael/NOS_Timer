@@ -204,20 +204,15 @@ if (buttonState == LOW && x==1 ) {
     lcd.print(vDelay / 1000); // ausgabe zeit 
     lcd.setCursor(11, 0);
     lcd.print("ms");
-   lcd.setCursor(0, 12);
-   lcd.print("Retard:");
+   lcd.setCursor(0, 1);
+   lcd.print("Retard Curve:");
    lcd.setCursor(9, 1);
-    lcd.print(Retard);
+    lcd.print(RetardCourve);
    do {
  
     
     
-    
-   
-    lcd.setCursor(7, 0);
-    lcd.print(vDelay / 1000); // ausgabe zeit 
-    lcd.setCursor(9, 1);
-    lcd.print(Retard);
+
     
     
              

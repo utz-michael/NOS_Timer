@@ -62,7 +62,7 @@ Serial.begin(9600);
   pinMode(TransbrakePIN, INPUT);     //transbrake
   
  //NOS ausgang ausschalten
-  digitalWrite(NOSFoggerPIN, LOW); 
+  digitalWrite(NOSFoggerPIN, HIGH); 
   
 // SPI Wiederstand setup
  SPI.begin();
@@ -221,7 +221,7 @@ if (buttonState == LOW && x==1 ) {
  vDelay = mDelay - lastDelay;  // Differenz zum letzten Durchlauf berechnen
   
    if (vDelay > Delay * 1000 && n == 0) { 
-    digitalWrite(NOSFoggerPIN, HIGH);
+    digitalWrite(NOSFoggerPIN, LOW);
  
  
 lastNOS = mDelay ;
@@ -230,7 +230,7 @@ lastNOS = mDelay ;
    vNOS = mDelay - lastNOS;
    
   if (vNOS > NOS * 1000 && n == 1){ 
-    digitalWrite(NOSFoggerPIN, LOW);  // nos dauer
+    digitalWrite(NOSFoggerPIN, HIGH);  // nos dauer
     digitalPotWrite(0,0); //  Retard ausschalten Wiederstandswert setzen  48.82 Ohm pro einheit
     nosactive = 0;
      n = 0 ;
@@ -239,7 +239,7 @@ lastNOS = mDelay ;
  buttonState = digitalRead(TransbrakePIN); // abfrage während des laufes
    
 if (buttonState == HIGH && x==0 ) { // abbruch kriterium und neustart
-  digitalWrite(NOSFoggerPIN, LOW);
+  digitalWrite(NOSFoggerPIN, HIGH);
   digitalPotWrite(0,0); //  Retard ausschalten Wiederstandswert setzen  48.82 Ohm pro einheit
   nosactive = 0;
   n=0;

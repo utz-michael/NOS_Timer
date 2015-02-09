@@ -250,11 +250,16 @@ if (buttonState == HIGH && x==0 ) { // abbruch kriterium und neustart
  
   RetardEingang = digitalSmooth(analogRead(5), sensSmoothArray1) ; // einlesen und Filtern der Analogen Spannung vom REVO Controller
    //----- Berechnung des Wiederstandes und des Retards------------------------------------------------
-    
+ 
    
   Retard =  ((MaxHP/(1023.0/RetardEingang)) /50.0)*RetardCourve;
   
-  WiederstandRAW = Retard *1000.0 /48.828125 ; 
+  WiederstandRAW = Retard *1000.0 /48.828125 ;
+  
+  Serial.print("eingang");
+  Serial.print(RetardEingang);   
+  Serial.print("retard");
+  Serial.println(WiederstandRAW);
   
   if ( (WiederstandRAW_Old - WiederstandRAW) >= 2 || (WiederstandRAW -WiederstandRAW_Old) >= 2) {
   digitalPotWrite(0,WiederstandRAW); // Wiederstandswert setzen  48.82 Ohm pro einheit 

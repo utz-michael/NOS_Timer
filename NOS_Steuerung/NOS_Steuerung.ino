@@ -8,7 +8,7 @@ LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 // set pin numbers:
 const int TransbrakePIN = 2;     // the number of the pushbutton pin Transbrake Button
 //const int ledPin1 =  13;      // the number of the LED pin Tranbrake
-const int NOSFoggerPIN =  3;      // the number of the LED pin NOS
+const int RevoPIN =  3;      // the number of the LED pin NOS
 
 
 
@@ -55,14 +55,14 @@ void setup() {
   // initialize the LED pin as an output:
 Serial.begin(9600);
 //  pinMode(ledPin1, OUTPUT);     // Transbarke Indikator nicht genutzt
-  pinMode(NOSFoggerPIN, OUTPUT);    // Nos Aktiv
+  pinMode(RevoPIN, OUTPUT);    // Nos Aktiv
   
   
   // initialize the pushbutton pin as an input:
   pinMode(TransbrakePIN, INPUT);     //transbrake
   
  //NOS ausgang ausschalten
-  digitalWrite(NOSFoggerPIN, HIGH); 
+  digitalWrite(RevoPIN, HIGH); 
   
 // SPI Wiederstand setup
  SPI.begin();
@@ -221,7 +221,7 @@ if (buttonState == LOW && x==1 ) {
  vDelay = mDelay - lastDelay;  // Differenz zum letzten Durchlauf berechnen
   
    if (vDelay > Delay * 1000 && n == 0) { 
-    digitalWrite(NOSFoggerPIN, LOW);
+    digitalWrite(RevoPIN, LOW);
  
  
 lastNOS = mDelay ;
@@ -230,7 +230,7 @@ lastNOS = mDelay ;
    vNOS = mDelay - lastNOS;
    
   if (vNOS > NOS * 1000 && n == 1){ 
-    digitalWrite(NOSFoggerPIN, HIGH);  // nos dauer
+    digitalWrite(RevoPIN, HIGH);  // nos dauer
     digitalPotWrite(0,0); //  Retard ausschalten Wiederstandswert setzen  48.82 Ohm pro einheit
     nosactive = 0;
      n = 0 ;
@@ -239,7 +239,7 @@ lastNOS = mDelay ;
  buttonState = digitalRead(TransbrakePIN); // abfrage während des laufes
    
 if (buttonState == HIGH && x==0 ) { // abbruch kriterium und neustart
-  digitalWrite(NOSFoggerPIN, HIGH);
+  digitalWrite(RevoPIN, HIGH);
   digitalPotWrite(0,0); //  Retard ausschalten Wiederstandswert setzen  48.82 Ohm pro einheit
   nosactive = 0;
   n=0;

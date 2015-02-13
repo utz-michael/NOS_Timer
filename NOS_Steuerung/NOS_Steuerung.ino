@@ -246,30 +246,10 @@ if (buttonState == HIGH && x==0 ) { // abbruch kriterium und neustart
   x=1;
  }
  //---------------------------------------------------------------------
- // Retart steuerung
  
-  RetardEingang = digitalSmooth(analogRead(5), sensSmoothArray1) ; // einlesen und Filtern der Analogen Spannung vom REVO Controller
-   //----- Berechnung des Wiederstandes und des Retards------------------------------------------------
+ retardFormel ();
  
-   
-  Retard =  ((MaxHP/(1023.0/RetardEingang)) /50.0)*RetardCourve;
-  
-  WiederstandRAW = Retard *1000.0 /48.828125 ;
-  
-  Serial.print("eingang");
-  Serial.print(RetardEingang);   
-  Serial.print("retard");
-  Serial.println(WiederstandRAW);
-  
-  if ( (WiederstandRAW_Old - WiederstandRAW) >= 2 || (WiederstandRAW -WiederstandRAW_Old) >= 2) {
-  digitalPotWrite(0,WiederstandRAW); // Wiederstandswert setzen  48.82 Ohm pro einheit 
-  }
-  WiederstandRAW_Old = WiederstandRAW;
- test++;
- //-------------------------------------------------------------------------------------------------
- 
- 
- 
+ //-------------------------------------------------------------------
  }
      while (nosactive == 1);  
     
@@ -563,5 +543,38 @@ void digitalPotWrite(int address, int value) {
  SPI.transfer(byte1);
  SPI.transfer(byte0);
  digitalWrite(csPin, HIGH); //de-select slave
-} 
+}
 
+void retardFormel(){
+
+// Retart steuerung
+ 
+  RetardEingang = digitalSmooth(analogRead(5), sensSmoothArray1) ; // einlesen und Filtern der Analogen Spannung vom REVO Controller
+   //----- Berechnung des Wiederstandes und des Retards------------------------------------------------
+ 
+   
+  Retard =  ((MaxHP/(1023.0/RetardEingang)) /50.0)*RetardCourve;
+  
+  WiederstandRAW = Retard *1000.0 /48.828125 ;
+  
+  Serial.print("AnalogIn ");
+  Serial.print(RetardEingang);   
+  Serial.print(" Spannung ");
+  Serial.print(RetardEingang*0.0049);   
+  Serial.print(" retard raw ");
+  Serial.print(WiederstandRAW);
+  Serial.print(" Wiederstand ");
+  Serial.printl(WiederstandRAW*48.828125);
+  Serial.print(" Retard ");
+  Serial.println(Retard);
+  
+  //if ( (WiederstandRAW_Old - WiederstandRAW) >= 2 || (WiederstandRAW -WiederstandRAW_Old) >= 2) {
+ // digitalPotWrite(0,WiederstandRAW); // Wiederstandswert setzen  48.82 Ohm pro einheit 
+ // }
+ // WiederstandRAW_Old = WiederstandRAW;
+  digitalPotWrite(0,WiederstandRAW);
+ 
+ test++;
+ return;
+ //-------------------------------------------------------------------------------------------------
+ }

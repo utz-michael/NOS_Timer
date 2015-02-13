@@ -22,7 +22,7 @@ int test;
 int ledState = LOW;             // ledState used to set the LED
 int n = 0;                    // indikator ob delay durchgelaufen
 long previousMillis = 0;        // will store last time LED was updated
-long interval = 3000;           // LCD blink geschwindigkeit
+long interval = 7000;           // LCD blink geschwindigkeit
 
 volatile int nosactive = 0; // nos status fÃ¼r interupt
 
@@ -36,7 +36,7 @@ unsigned long NOS = 1000;    // default wert
 unsigned long Delay = 500;  // default wert
 int x = 0;
 
-float RetardCourve = 1.5 ; //Retard kurve 1.0 bis 3.0 per 50 ps NOS
+float RetardCurve = 1.5 ; //Retard kurve 1.0 bis 3.0 per 50 ps NOS
 float Retard = 1.5 ; // aktuell gesetztes retard
 int retard;
 int RetardEingang;
@@ -81,7 +81,7 @@ Serial.begin(9600);
  // set up the LCD's number of columns and rows: 
   lcd.begin(16, 2);
    lcd.setCursor(0, 0);
-    lcd.print("    NOS delay   ");
+    lcd.print("       NOS      ");
     lcd.setCursor(0, 1);
     lcd.print("   Controller   ");
   delay(5000);
@@ -151,9 +151,12 @@ void loop(){
        lcd.clear();
     lcd.setCursor(0, 0);
     keyPress = analogRead(0); 
-    lcd.print("Retard per 50HP");
-    lcd.setCursor(6, 1);
-    lcd.print(RetardCourve);
+    lcd.print("Retard/50HP ");
+    lcd.print(RetardCurve);
+    lcd.setCursor(0, 1);
+    lcd.print("Max HP ");
+    lcd.print(MaxHP);
+    lcd.print(" PS");
      }
  
    }
@@ -208,7 +211,7 @@ if (buttonState == LOW && x==1 ) {
    lcd.setCursor(0, 1);
    lcd.print("RetardBase:");
    lcd.setCursor(11, 1);
-    lcd.print(RetardCourve);
+    lcd.print(RetardCurve);
    do {
  
     
@@ -384,15 +387,15 @@ digitalPotWrite(0,0); //  Retard ausschalten Wiederstandswert setzen  48.82 Ohm 
       lcd.setCursor(0, 0);
       lcd.print("Retard per 50 HP");
       lcd.setCursor(0, 1);
-      lcd.print(RetardCourve);
+      lcd.print(RetardCurve);
       
     
       
      keyPress = analogRead(0);
       // up
    if(keyPress < 221 && keyPress > 66 ){
-        RetardCourve = RetardCourve + 0.10;
-        if (RetardCourve >= 3.00){RetardCourve = 3.00;}
+        RetardCurve = RetardCurve + 0.10;
+        if (RetardCurve >= 3.00){RetardCurve = 3.00;}
      
      
        // Teste entprellen
@@ -404,9 +407,9 @@ digitalPotWrite(0,0); //  Retard ausschalten Wiederstandswert setzen  48.82 Ohm 
      
          // down
     if(keyPress < 395 && keyPress > 230 ){
-        RetardCourve = RetardCourve - 0.1;
-        if (RetardCourve <= 1.0){RetardCourve = 1.0;}
-      if (RetardCourve >= 3.0){RetardCourve = 1.0;} 
+        RetardCurve = RetardCurve - 0.1;
+        if (RetardCurve <= 1.0){RetardCurve = 1.0;}
+      if (RetardCurve >= 3.0){RetardCurve = 1.0;} 
    // Teste entprellen
        do {
      keyPress = analogRead(0); 
@@ -424,7 +427,52 @@ digitalPotWrite(0,0); //  Retard ausschalten Wiederstandswert setzen  48.82 Ohm 
   
    //------------------------------       
        
+       // Leistung  einstellen ------------------------------------------------------------------------------
+      lcd.clear();
+       do
+{
+      lcd.setCursor(0, 0);
+      lcd.print("Setup Max HP ");
+      lcd.setCursor(0, 1);
+      lcd.print(MaxHP);
+      lcd.print("PS        ");
+    
+      
+     keyPress = analogRead(0);
+      // up
+   if(keyPress < 221 && keyPress > 66 ){
+        MaxHP = MaxHP + 50;
+        if (MaxHP >= 1000){NOS = 1000;}
+     
+     
+       // Teste entprellen
+     do {
+     keyPress = analogRead(0); 
+  }while (keyPress < 900 ); 
+  //------------------------------ 
+      }
+     
+         // down
+    if(keyPress < 395 && keyPress > 230 ){
+        MaxHP = MaxHP - 50;
+        if (MaxHP <= 0){MaxHP = 0;}
+      if (MaxHP >= 1000){MaxHP = 0;} 
+   // Teste entprellen
+       do {
+     keyPress = analogRead(0); 
+  }while (keyPress < 900 ); 
+  //------------------------------
+    }
+     
+      
+      
+      } while (keyPress > 50 ); // rechte taste abfragen
+   // Teste entprellen    
+       do {
+     keyPress = analogRead(0); 
+  }while (keyPress < 900 );
   
+   //------------------------------
       
   lcd.clear();
    writemem ();   // daten speichern
@@ -436,7 +484,7 @@ digitalPotWrite(0,0); //  Retard ausschalten Wiederstandswert setzen  48.82 Ohm 
 }
 void writemem () {
    
-  retard = RetardCourve * 10.0;
+  retard = RetardCurve * 10.0;
    
 // integer in byte umwandeln
   byte firstByte = byte(Delay >> 8);
@@ -445,6 +493,8 @@ void writemem () {
   byte forthByte = byte(NOS & 0x00FF);
   byte fifthByte = byte(retard >> 8);
   byte sixthByte = byte(retard & 0x00FF);
+  byte seventhByte = byte(MaxHP >> 8);
+  byte eightByte = byte(MaxHP & 0x00FF);
  
     //eeprom schreiben
       EEPROM.write(0, firstByte);
@@ -453,6 +503,8 @@ void writemem () {
       EEPROM.write(3, forthByte);
       EEPROM.write(4, fifthByte);
       EEPROM.write(5, sixthByte);
+      EEPROM.write(6, seventhByte);
+      EEPROM.write(7, eightByte);
    
       return;
 }
@@ -466,13 +518,16 @@ void readmem () {
    byte  forthByte = EEPROM.read(3);
    byte  fifthByte = EEPROM.read(4);
    byte  sixthByte = EEPROM.read(5);
+   byte  seventhByte = EEPROM.read(6);
+   byte  eightByte = EEPROM.read(7);
  
   //byte in integer wandeln   
    Delay = int(firstByte << 8) + int(secondByte);
    NOS = int(thirdByte << 8) + int(forthByte);
    retard = int(fifthByte << 8) + int (sixthByte);
+   MaxHP = int(seventhByte << 8) + int (eightByte);
    
-    RetardCourve = retard / 10.0;
+    RetardCurve = retard / 10.0;
     
 return;
 }
@@ -553,7 +608,7 @@ void retardFormel(){
    //----- Berechnung des Wiederstandes und des Retards------------------------------------------------
  
    
-  Retard =  ((MaxHP/(1023.0/RetardEingang)) /50.0)*RetardCourve;
+  Retard =  ((MaxHP/(1023.0/RetardEingang)) /50.0)*RetardCurve;
   
   WiederstandRAW = Retard *1000.0 /48.828125 ;
   
@@ -564,7 +619,7 @@ void retardFormel(){
   Serial.print(" retard raw ");
   Serial.print(WiederstandRAW);
   Serial.print(" Wiederstand ");
-  Serial.printl(WiederstandRAW*48.828125);
+  Serial.print(WiederstandRAW*48.828125);
   Serial.print(" Retard ");
   Serial.println(Retard);
   
